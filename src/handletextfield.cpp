@@ -1,5 +1,5 @@
 #include "handletextfield.h"
-#include "libgoshim.h"
+#include "lib/libgoshim.h"
 
 HandleTextField::HandleTextField(QObject *parent) :
     QObject(parent)
