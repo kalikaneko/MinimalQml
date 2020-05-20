@@ -1,12 +1,9 @@
-build
-src/CMakeCache.txt
-src/CMakeFiles/
+lib/*
 src/src
 .qmake.stash
-lib/*
-Makefile
-MinimalQml
 moc_*
 qrc_*
 *.o
+Makefile
+MinimalQml
 
