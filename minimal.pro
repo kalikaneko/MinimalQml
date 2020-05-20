@@ -1,18 +1,16 @@
-CONFIG += qt debug staticlib
+CONFIG += qt staticlib
+unix:CONFIG += debug
+
 QT += qml quick
 
 SOURCES += src/main.cpp \
            src/handletextfield.cpp \
 
 HEADERS += src/handletextfield.h \
-           lib/goshim.h
+           lib/libgoshim.h
 
 RESOURCES += src/qml.qrc
 
 TARGET=MinimalQml
-
 LIBS += -L./lib -lgoshim -lpthread
-
-win32:INCLUDEPATH += "C:/mylibs/extra_headers"
-unix:INCLUDEPATH += "/home/user/extra_headers"
 
