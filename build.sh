@@ -32,8 +32,7 @@ function buildGoLib {
     if [ "$XBUILD" == "$WIN64" ]
     then
         echo "Building Go library with mxe..."
-        # TODO need to pass CC?
-        CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -buildmode=c-archive -o $TARGET_GOLIB go/test.go
+        CC=$CC CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -buildmode=c-archive -o $TARGET_GOLIB go/test.go
     fi
 }
 

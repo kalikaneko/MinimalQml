@@ -35,6 +35,9 @@ TODO
 ------------------
 
 * [ ] provide Vagrantfile (or Dockerfile) with mxe toolchain pre-installed.
-* [ ] document quirks on complation of the toolchain (uh... maybe give another try to debian packages!)
+* [ ] document quirks on complation of the toolchain (uh... maybe give another try to debian packages, now that I got the go cross-compilation right!)
+* [ ] explore qtquick deployment "the qt way" 
+  * [ ] https://doc.qt.io/qt-5/qtquick-deployment.html
+  * [ ] windeployqt? if this works for UWP, that'd be super nice https://doc.qt.io/qt-5/windows-deployment.html *"The Windows deployment tool windeployqt is designed to automate the process of creating a deployable folder containing the Qt-related dependencies (libraries, QML imports, plugins, and translations) required to run the application from that folder. It creates a sandbox for Universal Windows Platform (UWP) or an installation tree for Windows desktop applications, which can be easily bundled into an installation package."*
 
 
