@@ -3,7 +3,7 @@
 #include <QQuickWindow>
 #include <QQmlContext>
 
-#include "handletextfield.h"
+#include "handlers.h"
 
 
 int main(int argc, char** argv)

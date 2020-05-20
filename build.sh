@@ -26,17 +26,19 @@ function init {
 function buildGoLib {
     if [ "$XBUILD" == "no" ]
     then
-        echo "Building Go library with standard Go compiler..."
+        echo "[+] Building Go library with standard Go compiler..."
         go build -buildmode=c-archive -o $TARGET_GOLIB go/test.go
     fi
     if [ "$XBUILD" == "$WIN64" ]
     then
-        echo "Building Go library with mxe..."
+        echo "[+] Building Go library with mxe..."
+        echo ">> USING CC:" $CC
         CC=$CC CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -buildmode=c-archive -o $TARGET_GOLIB go/test.go
     fi
 }
 
 function buildQmake {
+    echo "[+] Now building Qml app with Qt qmake..."
     $QMAKE -o Makefile minimal.pro
 }
 

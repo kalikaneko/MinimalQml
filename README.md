@@ -1,5 +1,5 @@
-Simple QML go/c++ project
-=========================
+A minimal QML c++/go application
+================================
 
 This project aims at proving a minimal feasible toolchain to build a Qt/Qml c++
 application that is a light wrapper around the functionality exposed by a go

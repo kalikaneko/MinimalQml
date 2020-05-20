@@ -1,5 +1,5 @@
-#ifndef HANDLETEXTFIELD_H
-#define HANDLETEXTFIELD_H
+#ifndef HANDLERS_H
+#define HANDLERS_H
 
 #include <QObject>
 #include <QDebug>
@@ -17,4 +17,4 @@ public slots:
         void handleSubmitTextField(const QString& in);
 };
 
-#endif // HANDLETEXTFIELD_H
+#endif // HANDLERS_H

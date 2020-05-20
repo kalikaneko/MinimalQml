@@ -1,12 +1,13 @@
 CONFIG += qt staticlib
+# TODO remove this in cross build?
 unix:CONFIG += debug
 
 QT += qml quick
 
 SOURCES += src/main.cpp \
-           src/handletextfield.cpp \
+           src/handlers.cpp \
 
-HEADERS += src/handletextfield.h \
+HEADERS += src/handlers.h \
            lib/libgoshim.h
 
 RESOURCES += src/qml.qrc
