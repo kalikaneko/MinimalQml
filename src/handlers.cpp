@@ -9,6 +9,7 @@ HandleTextField::HandleTextField(QObject *parent) :
 void HandleTextField::handleSubmitTextField(const QString &in)
 {
     qDebug() << "c++: HandleTextField::handleSubmitTextField:" << in;
+    /* we emit a signal here */
     emit setTextField(in.toUpper());
     GoString name = {"dear user", strlen("dear user")};
     hello(name);

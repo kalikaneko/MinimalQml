@@ -7,6 +7,7 @@ WIN64="win64"
 GO=`which go`
 
 TARGET_GOLIB=lib/libgoshim.a
+SOURCE_GOLIB=go/wrapper.go
 
 
 if [ "$XBUILD" == "$WIN64" ]
@@ -29,19 +30,20 @@ function buildGoLib {
     if [ "$XBUILD" == "no" ]
     then
         echo "[+] Building Go library with standard Go compiler"
-        go build -buildmode=c-archive -o $TARGET_GOLIB go/test.go
+        go build -buildmode=c-archive -o $TARGET_GOLIB $SOURCE_GOLIB
     fi
     if [ "$XBUILD" == "$WIN64" ]
     then
         echo "[+] Building Go library with mxe"
-        echo ">> USING CC:" $CC
-        CC=$CC CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -buildmode=c-archive -o $TARGET_GOLIB go/test.go
+        echo ">> using cc:" $CC
+        CC=$CC CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -buildmode=c-archive -o $TARGET_GOLIB $SOURCE_GOLIB
     fi
 }
 
 function buildQmake {
     echo "[+] Now building Qml app with Qt qmake"
-    $QMAKE -o Makefile minimal.pro
+    echo ">> using qmake:" $QMAKE
+    $QMAKE -o Makefile "CONFIG-=debug" minimal.pro
 }
 
 echo "[+] Building minimal qml example..."

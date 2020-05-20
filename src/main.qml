@@ -6,7 +6,7 @@ Window {
     signal submitTextField(string text)
 
     // this function is our QML slot
-    function setTextField(text){
+    function setTextFieldUI(text){
         console.log("setTextField: " + text)
         textField1.text = text
     }

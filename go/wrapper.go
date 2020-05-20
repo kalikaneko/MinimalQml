@@ -5,7 +5,9 @@ import "fmt"
 
 //export hello
 func hello(name string) {
-	fmt.Printf("Hello from Go, %s!\n", name);
+        fmt.Printf("Hello from Go, %s!\n", name);
 }
 
-func main() {}
+func main() {
+        fmt.Println("Initializing Go...") 
+}
