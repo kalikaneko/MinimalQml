@@ -30,7 +30,7 @@ function buildGoLib {
     if [ "$XBUILD" == "no" ]
     then
         echo "[+] Building Go library with standard Go compiler"
-        go build -buildmode=c-archive -o $TARGET_GOLIB $SOURCE_GOLIB
+        CGO_ENABLED=1 go build -buildmode=c-archive -o $TARGET_GOLIB $SOURCE_GOLIB
     fi
     if [ "$XBUILD" == "$WIN64" ]
     then

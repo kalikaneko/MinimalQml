@@ -1,0 +1,22 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+  config.vm.box = "debian/buster64"
+
+  config.vm.provider "libvirt" do |v|
+    v.memory = "4098"
+    v.cpus = 4
+  end
+
+# pre-built:
+# deb http://pkg.mxe.cc/repos/apt stretch main
+# old go version? 
+# wget https://dl.google.com/go/go1.13.3.linux-amd64.tar.gz
+# --> linking problems
+# deps:
+  # golang-go
+  # mxe-x86-64-w64-mingw32.static-qt5
+  # git
+
+end
