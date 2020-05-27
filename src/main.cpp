@@ -1,11 +1,14 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQuickWindow>
-#include <QQmlContext>
+#include <QtQml>
 #include <QTimer>
 
-#include "handlers.h"
+#include <string>
+
 #include "lib/libgoshim.h"
+#include "handlers.h"
+#include "qjsonmodel.h"
 
 void onStatusChanged() {
     printf("(from c) status changed!\n");
@@ -14,8 +17,18 @@ void onStatusChanged() {
 int main(int argc, char** argv)
 {
     QGuiApplication app(argc, argv);
+
+    QJsonModel* model = new QJsonModel;
+    std::string json = R"({
+                       "foo": "bar"
+                   })";
+    model->loadJson(QByteArray::fromStdString(json));
+
     QQmlApplicationEngine engine;
+    QQmlContext* ctx = engine.rootContext();
+    ctx->setContextProperty("jsonModel", model);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
+
 
     HandleTextField handleTextField;
 
@@ -37,7 +50,7 @@ int main(int argc, char** argv)
     GoString statusChangedEvt = {stCh, strlen(stCh)};
     SubscribeToEvent(statusChangedEvt, (void*)onStatusChanged);
 
-    /* trigger a status change */
+    /* trigger a dummy status change */
     QTimer::singleShot(2000, [] { TriggerStatusChange(); });
 
     /* initialize connection context  */

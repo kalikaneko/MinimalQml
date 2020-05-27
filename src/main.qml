@@ -1,6 +1,6 @@
 import QtQuick 2.3
 import QtQuick.Window 2.2
-import QtQuick.Controls 1.2
+import QtQuick.Controls 1.4
 
 Window {
     signal submitTextField(string text)
@@ -30,12 +30,65 @@ Window {
     }
 
     Button {
-        x: 193
-        y: 167
-        text: qsTr("Uppercase me!")
+        id: onBtn
+        x: 50
+        y: 200
+        text: qsTr("on")
 
         onClicked:
             // emit the submitTextField signal
             submitTextField(textField1.text)
     }
+
+    Button {
+        id: offBtn
+        x: 150
+        y: 200
+        text: qsTr("off")
+
+        onClicked:
+            // emit the submitTextField signal
+            submitTextField(textField1.text)
+    }
+
+    TreeView {
+        id: treeView
+        model: jsonModel
+        anchors.left: parent.left
+        anchors.right: parent.right
+
+        TableViewColumn {
+            id: keyCol
+            title: "key"
+            role: "key"
+            delegate: EditorDelegate {
+                text: styleData.value
+                onTextChanged: {
+                    /* 
+                       this calls setData in the model,
+                       which in turn emits dataChanged signal
+                    */
+                    model.key = text
+                }
+            }
+        }
+
+        TableViewColumn {
+            id: valueCol
+            title: "value"
+            role: "value"
+            movable: true
+            width: treeView.viewport.width - keyCol.width
+            delegate: EditorDelegate {
+                text: styleData.value
+                onTextChanged: {
+                    /* 
+                       this calls setData in the model,
+                       which in turn emits dataChanged signal
+                    */
+                    model.value = text
+                }
+            }
+        }
+    }  
 }
