@@ -3,7 +3,10 @@ package main
 /* a minimal example of how to register C callbacks and calling them from go */
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"log"
 	"reflect"
 	"sync"
 	"unsafe"
@@ -15,50 +18,174 @@ import (
 // }
 import "C"
 
-type Hooks struct {
-	OnStatusChanged string
-}
+/* callbacks into C-land */
 
 var mut sync.Mutex
 var cbs = make(map[string](*[0]byte))
+var initOnce sync.Once
 
-func registerCb(name string, fp unsafe.Pointer) {
+// Events knows about all the posible events that C functions can be interested
+// in subscribing to. You cannot subscribe to an event that is not listed here.
+type Events struct {
+	OnStatusChanged string
+}
+
+// subscribe registers a callback from C-land.
+// This callback needs to be passed as a void* C function pointer.
+func subscribe(event string, fp unsafe.Pointer) {
 	mut.Lock()
 	defer mut.Unlock()
-	h := &Hooks{}
-	v := reflect.Indirect(reflect.ValueOf(&h))
-	hf := v.Elem().FieldByName(name)
+	e := &Events{}
+	v := reflect.Indirect(reflect.ValueOf(&e))
+	hf := v.Elem().FieldByName(event)
 	if reflect.ValueOf(hf).IsZero() {
-		fmt.Println("ERROR: not a valid hook:", name)
+		fmt.Println("ERROR: not a valid event:", event)
 	} else {
-		cbs[name] = (*[0]byte)(fp)
+		cbs[event] = (*[0]byte)(fp)
 	}
 }
 
-func fireCb(name string) {
+// trigger fires a callback from C-land.
+func trigger(event string) {
 	mut.Lock()
 	defer mut.Unlock()
-	cb := cbs[name]
+	cb := cbs[event]
 	if cb != nil {
 		C._do_callback(cb)
 	} else {
-		fmt.Println("ERROR: callback not set", name)
+		fmt.Println("ERROR: this event does not have subscribers:", event)
 	}
 }
 
-//export RegisterCallback
-func RegisterCallback(hookName string, f unsafe.Pointer) {
-	registerCb(hookName, f)
+/* connection status */
+
+// status reflects the current state of the VPN connection. Go code is responsible for
+// updating it; C-land just watches its changes and pulls its updates via the serialized
+// context object.
+type status int
+
+const (
+	off status = iota
+	connecting
+	on
+	disconnecting
+	failed
+)
+
+func (s status) String() string {
+	return [...]string{"off", "connecting", "on", "disconnecting", "failed"}[s]
 }
 
-//export TriggerStatusChange
-func TriggerStatusChange() {
-	fireCb("OnStatusChanged")
+func (s status) MarshalJSON() ([]byte, error) {
+	b := bytes.NewBufferString(`"`)
+	b.WriteString(s.String())
+	b.WriteString(`"`)
+	return b.Bytes(), nil
 }
+
+// An action is originated in the UI. They are requests coming from the
+// frontend via the C code. VPN code needs to watch them and fullfill their
+// requests as soon as possible.
+type actions int
+
+const (
+	switchOn actions = iota
+	switchOff
+	unblock
+)
+
+func (a actions) String() string {
+	return [...]string{"switchOn", "switchOff", "unblock"}[a]
+}
+
+func (a actions) MarshalJSON() ([]byte, error) {
+	b := bytes.NewBufferString(`"`)
+	b.WriteString(a.String())
+	b.WriteString(`"`)
+	return b.Bytes(), nil
+}
+
+// connectionCtx is the global struct that is passed around to C-land. It also
+// serves as the primary way of passing requests from the frontend to the Go-core, by
+// letting the UI write some of these variables and processing them.
+type connectionCtx struct {
+	AppName  string    `json:"appName"`
+	Provider string    `json:"provider"`
+	Status   status    `json:"status"`
+	Actions  []actions `json:"actions,omitempty"`
+}
+
+func (c connectionCtx) toJson() ([]byte, error) {
+	b, err := json.Marshal(c)
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+	return b, nil
+}
+
+var ctx *connectionCtx
+
+// initializeContext initializes an empty connStatus and sets the global
+// ctx variable to it. This is expected to be called only once, so the public
+// api uses the sync.Once primitive to call this.
+func initializeContext(provider, appName string) {
+	var st status = off
+	c := connectionCtx{
+		AppName:  appName,
+		Provider: provider,
+		Status:   st,
+	}
+	ctx = &c
+}
+
+/*
+
+  exported C api
+
+*/
 
 //export SayHello
 func SayHello() {
 	fmt.Println("hello from go, earthling!")
 }
 
+//export TriggerStatusChange
+func TriggerStatusChange() {
+	// XXX just for testing
+	trigger("OnStatusChanged")
+}
+
+//export SubscribeToEvent
+func SubscribeToEvent(event string, f unsafe.Pointer) {
+	subscribe(event, f)
+}
+
+//export InitializeContext
+func InitializeContext() {
+	provider := "black.riseup.net"
+	appName := "RiseupVPN"
+	initOnce.Do(func() {
+		initializeContext(provider, appName)
+	})
+	fmt.Println(">>> ctx: ", ctx)
+	c, _ := ctx.toJson()
+	fmt.Println(">>> ctx: ", string(c))
+}
+
+//export RefreshContext
+func RefreshContext() string {
+	return "foobar"
+}
+
 func main() {}
+
+/*
+TODO:
+  [ ] modify state (struct?) from outside
+  [ ] setState function that calls C callback
+  [x] serialize the whole context struct into Json
+  [ ] receive the json in c++ -> update the Qml model
+  [ ] call Go Functions from Qml/c++ (switch off / on)
+  [ ] trigger ui events (like dialogs) from Go-land
+*/

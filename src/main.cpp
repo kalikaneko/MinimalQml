@@ -34,11 +34,14 @@ int main(int argc, char** argv)
 
     /* register statusChanged callback */
     char* stCh = "OnStatusChanged";
-    GoString statusHook = {stCh, strlen(stCh)};
-    RegisterCallback(statusHook, (void*)onStatusChanged);
+    GoString statusChangedEvt = {stCh, strlen(stCh)};
+    SubscribeToEvent(statusChangedEvt, (void*)onStatusChanged);
 
     /* trigger a status change */
     QTimer::singleShot(2000, [] { TriggerStatusChange(); });
+
+    /* initialize connection context  */
+    InitializeContext();
 
     return app.exec();
 }
