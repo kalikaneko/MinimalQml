@@ -14,7 +14,7 @@ import (
 )
 
 // typedef void (*cb)();
-// static void _do_callback(cb f) {
+// inline void _do_callback(cb f) {
 // 	f();
 // }
 import "C"

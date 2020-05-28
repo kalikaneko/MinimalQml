@@ -66,17 +66,14 @@ int main(int argc, char **argv) {
     ctx->setContextProperty("jsonModel", model);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-    QObject *topLevel = engine.rootObjects().value(0);
-    QQuickWindow *window = qobject_cast<QQuickWindow *>(topLevel);
-
     /* connect signals */
     QObject::connect(qw, &QJsonWatch::jsonChanged, [ctx, model](QString js) {
         model->loadJson(js.toUtf8());
     });
 
     /* register statusChanged callback */
-    char *stCh = "OnStatusChanged";
-    GoString statusChangedEvt = {stCh, strlen(stCh)};
+    const char *stCh = "OnStatusChanged";
+    GoString statusChangedEvt = {stCh, (long int)strlen(stCh)};
     SubscribeToEvent(statusChangedEvt, (void *)onStatusChanged);
 
     /* initialize connection context  */
