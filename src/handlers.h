@@ -1,20 +1,39 @@
 #ifndef HANDLERS_H
 #define HANDLERS_H
 
-#include <QObject>
 #include <QDebug>
+#include <QObject>
+#include "qjsonmodel.h"
 
-class HandleTextField :  public QObject
-{
-        Q_OBJECT
-public:
-        explicit HandleTextField(QObject *parent = 0);
+class QJsonWatch : public QObject {
+    Q_OBJECT
+    QJsonModel *model;
 
-signals:
-        void setTextField(QVariant text);
-
-public slots:
-        void handleSubmitTextField(const QString& in);
+   signals:
+    void jsonChanged(QString json);
 };
 
-#endif // HANDLERS_H
+class QJsonProxy : public QObject {
+    Q_OBJECT
+
+   public:
+    explicit QJsonProxy(QObject *parent = 0);
+
+   public slots:
+    void readJson(QString json);
+};
+
+class HandleTextField : public QObject {
+    Q_OBJECT
+
+   public:
+    explicit HandleTextField(QObject *parent = 0);
+
+   signals:
+    void setTextField(QVariant text);
+
+   public slots:
+    void handleSubmitTextField(const QString &in);
+};
+
+#endif  // HANDLERS_H
