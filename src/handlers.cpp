@@ -9,15 +9,15 @@ Backend::Backend(QObject *parent) : QObject(parent)
 
 void Backend::switchOn()
 {
-    qDebug() << "switch on plz";
+    SwitchOn();
 }
 
 void Backend::switchOff()
 {
-    qDebug() << "switch off plz";
+    SwitchOff();
 }
 
 void Backend::unblock()
 {
-    qDebug() << "unblock plz";
+    Unblock();
 }

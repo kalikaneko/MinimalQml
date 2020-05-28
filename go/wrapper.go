@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"reflect"
 	"sync"
+	"time"
 	"unsafe"
 )
 
@@ -32,6 +33,8 @@ var initOnce sync.Once
 type Events struct {
 	OnStatusChanged string
 }
+
+const OnStatusChanged string = "OnStatusChanged"
 
 // subscribe registers a callback from C-land.
 // This callback needs to be passed as a void* C function pointer.
@@ -136,7 +139,7 @@ func setStatus(st status) {
 	stmut.Lock()
 	defer stmut.Unlock()
 	ctx.Status = st
-	go trigger("OnStatusChanged")
+	go trigger(OnStatusChanged)
 }
 
 // initializeContext initializes an empty connStatus and assigns it to the
@@ -149,6 +152,7 @@ func initializeContext(provider, appName string) {
 		Provider: provider,
 		Status:   st,
 	}
+	go trigger(OnStatusChanged)
 }
 
 /* mock http server: easy way to mocking vpn behavior on ui interaction. This
@@ -157,19 +161,23 @@ func initializeContext(provider, appName string) {
 
 func mockUIOn(w http.ResponseWriter, r *http.Request) {
 	log.Println("changing status: on")
-	var st status = on
-	setStatus(st)
+	setStatus(on)
 }
 
 func mockUIOff(w http.ResponseWriter, r *http.Request) {
 	log.Println("changing status: off")
-	var st status = off
-	setStatus(st)
+	setStatus(off)
+}
+
+func mockUIFailed(w http.ResponseWriter, r *http.Request) {
+	log.Println("changing status: failed")
+	setStatus(failed)
 }
 
 func mockUI() {
 	http.HandleFunc("/on", mockUIOn)
 	http.HandleFunc("/off", mockUIOff)
+	http.HandleFunc("/failed", mockUIFailed)
 	http.ListenAndServe(":8080", nil)
 }
 
@@ -182,16 +190,26 @@ func mockUI() {
 //export SwitchOn
 func SwitchOn() {
 	fmt.Println("switch on...")
+	setStatus(connecting)
+	go func() {
+		time.Sleep(2 * time.Second)
+		setStatus(on)
+	}()
 }
 
 //export SwitchOff
 func SwitchOff() {
 	fmt.Println("switch off...")
+	setStatus(disconnecting)
+	go func() {
+		time.Sleep(2 * time.Second)
+		setStatus(off)
+	}()
 }
 
 //export Unblock
 func Unblock() {
-	fmt.Println("switch off...")
+	fmt.Println("unblock... [not implemented]")
 }
 
 //export SubscribeToEvent
@@ -208,28 +226,20 @@ func InitializeContext() {
 	})
 }
 
-//export MockUIInteraction
-func MockUIInteraction() {
-	log.Println("mocking ui interaction on port 8080. \nTry 'curl localhost:8080/off' and  'curl localhost:8080/off' to toggle status.")
-	go mockUI()
-}
-
 //export RefreshContext
 func RefreshContext() *C.char {
 	c, _ := ctx.toJson()
 	return C.CString(string(c))
 }
 
-func main() {}
+/* end of the exposed api */
 
-/*
-TODO:
-  [x] modify state (struct?) from outside
-  [x] setState function that calls C callback
-  [x] serialize the whole context struct into Json
-  [x] receive the json in c++
-  [x] update the Qml model
-  [x] see that the UI reflects change
-  [ ] call Go Functions from Qml/c++ (switch off / on)
-  [ ] trigger ui events (like dialogs) from Go-land
-*/
+/* we could enable this one optionally for the qt tests */
+
+//export MockUIInteraction
+func MockUIInteraction() {
+	log.Println("mocking ui interaction on port 8080. \nTry 'curl localhost:8080/{on|off|failed}' to toggle status.")
+	go mockUI()
+}
+
+func main() {}
