@@ -9,19 +9,19 @@
 #include "qjsonmodel.h"
 #include "lib/libgoshim.h"
 
-/*
-   Hi! I'm Troy McClure and I'll be your guide today. You probably remember me
-   from blockbusters like "here be dragons" and "darling, I wrote you a little
-   contraption" */
+/* Hi! I'm Troy McClure and I'll be your guide today. You probably remember me
+   from blockbusters like "here be dragons" and "darling, I wrote a little
+   contraption". */
 
-/* This is our glorious global object state. In here we will receive a
-   serialized snapshot of the context from the application backend */
+/* Our glorious global object state. In here we store a serialized snapshot of
+   the context from the application "backend", living in the linked Go-land
+   lib. */
 
 static char *json;
 
-/* We are interested in observing changes to the global json variable.
-   The watchdog bridges the gap from pure c callbacks to the rest of the c++
-   logic. QJsonWatch is a QObject-derived class that can emit signals. */
+/* We are interested in observing changes to this global json variable.
+   The jsonWatchdog bridges the gap from pure c callbacks to the rest of the c++
+   logic. QJsonWatch comes from QObject so it can emit signals. */
 
 QJsonWatch *qw;
 
@@ -31,29 +31,28 @@ struct jsonWatchdog {
 };
 
 /* we need C wrappers around every C++ object, so that we can invoke their methods
- * in the callbacks passed to CGO. */
+   from the function pointers passed as callbacks to CGO. */
 extern "C" {
 static void *newWatchdog(void) { return (void *)(new jsonWatchdog); }
-static void jsonChanged(void *thisPtr) {
-    if (thisPtr != NULL) {
-        jsonWatchdog *classPtr = static_cast<jsonWatchdog *>(thisPtr);
-        classPtr->changed();
+static void jsonChanged(void *ptr) {
+    if (ptr != NULL) {
+        jsonWatchdog *klsPtr = static_cast<jsonWatchdog *>(ptr);
+        klsPtr->changed();
     }
 }
 }
 
 void *wd = newWatchdog();
 
-/* onStatusChanged is the registered C callback that we pass to CGO.
-   When called, it pulls a string serialization of the context object, than we
-   then pass along to the Qt objects, and from there to the Qml representation.
-*/
+/* onStatusChanged is the C function that we register as a callback with CGO,
+   to be called from the Go side. It pulls a string serialization of the
+   context object, than we then pass along to Qt objects and to Qml. */
 void onStatusChanged() {
-    char *st = RefreshContext();
-    json = st;
-    /* call the wrapped watchdog method, that emits a Qt signal in turn */
+    char *ctx = RefreshContext();
+    json = ctx;
+    /* the method wrapped emits a qt signal */
     jsonChanged(wd);
-    free(st);
+    free(ctx);
 }
 
 int main(int argc, char **argv) {
@@ -65,30 +64,31 @@ int main(int argc, char **argv) {
     std::string json = R"({"appName": "unknown", "provider": "unknown"})";
     model->loadJson(QByteArray::fromStdString(json));
 
-    /* set the backend handler class that holds all the slots responsible for
-     * calling back to Go with action requests */
+    /* the backend handler has slots for calling back to Go when triggered by
+       signals in Qml. */
     Backend backend;
     ctx->setContextProperty("backend", &backend);
 
-    /* set the json model, this gets re-loaded every time we receive an update from Go */
+    /* set the json model, load the qml */
     ctx->setContextProperty("jsonModel", model);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-    /* connect the jsonChanged signal explicitely. The signals in the
-     * GUI->Backend direction are done in the Qml layer and delegated to the
-     * Backend class. */
+    /* connect the jsonChanged signal explicitely.
+        In the lambda, we reload the json in the model every time we receive an
+        update from Go */
     QObject::connect(qw, &QJsonWatch::jsonChanged, [ctx, model](QString js) {
         model->loadJson(js.toUtf8());
     });
 
-    /* register statusChanged callback */
+    /* register statusChanged callback with CGO */
     const char *stCh = "OnStatusChanged";
     GoString statusChangedEvt = {stCh, (long int)strlen(stCh)};
     SubscribeToEvent(statusChangedEvt, (void *)onStatusChanged);
 
-    /* initialize connection context  */
+    /* let the Go side initialize its internal state */
     InitializeContext();
     MockUIInteraction();
 
+    /* kick off your shoes, put your feet up */
     return app.exec();
 }

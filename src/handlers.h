@@ -8,21 +8,23 @@
 class QJsonWatch : public QObject {
 
     Q_OBJECT
+
     QJsonModel *model;
 
-    public:
+public:
 
-    signals:
+signals:
 
-        void jsonChanged(QString json);
+    void jsonChanged(QString json);
 
 };
 
-class Backend : public QObject
-{
+class Backend : public QObject {
+
     Q_OBJECT
+
 public:
-        explicit Backend(QObject *parent = 0);
+    explicit Backend(QObject *parent = 0);
 
 public slots:
     void switchOn();
