@@ -9,17 +9,18 @@
 #include "qjsonmodel.h"
 #include "lib/libgoshim.h"
 
-/* Hi. I'm Troy McClure and I'll be your guide today to this little
-   contraption! Hold with me...
-*/
+/*
+   Hi! I'm Troy McClure and I'll be your guide today. You probably remember me
+   from blockbusters like "here be dragons" and "darling, I wrote you a little
+   contraption" */
 
-/* This is our glorious global object state. in here we will receive a
+/* This is our glorious global object state. In here we will receive a
    serialized snapshot of the context from the application backend */
 
 static char *json;
 
 /* We are interested in observing changes to the global json variable.
-   The watchdog bridges the gap rom pure c callbacks to the rest of the c++
+   The watchdog bridges the gap from pure c callbacks to the rest of the c++
    logic. QJsonWatch is a QObject-derived class that can emit signals. */
 
 QJsonWatch *qw;
