@@ -3,23 +3,33 @@
 
 #include <QDebug>
 #include <QObject>
+#include <QtQml>
 #include "qjsonmodel.h"
 
 class QJsonWatch : public QObject {
     Q_OBJECT
     QJsonModel *model;
 
-   signals:
-    void jsonChanged(QString json);
+    public:
+
+    signals:
+
+        void jsonChanged(QString json);
+
 };
 
+// FIXME -- I think we can do w/o this proxy, since i'm using a lambda in the end
+//
 class QJsonProxy : public QObject {
     Q_OBJECT
-    QJsonModel *model;
+    QQmlApplicationEngine *eng;
 
    public:
 
-    explicit QJsonProxy(QObject *parent = 0, QJsonModel *model = 0);
+    explicit QJsonProxy(QObject *parent = 0, QQmlApplicationEngine *eng = 0);
+
+   signals:
+    void updateModel(QString s);
 
    public slots:
     void readJson(QString json);

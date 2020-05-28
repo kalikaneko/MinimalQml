@@ -61,16 +61,6 @@ Window {
             id: keyCol
             title: "key"
             role: "key"
-            delegate: EditorDelegate {
-                text: styleData.value
-                onTextChanged: {
-                    /* 
-                       this calls setData in the model,
-                       which in turn emits dataChanged signal
-                    */
-                    model.key = text
-                }
-            }
         }
 
         TableViewColumn {
@@ -79,16 +69,6 @@ Window {
             role: "value"
             movable: true
             width: treeView.viewport.width - keyCol.width
-            delegate: EditorDelegate {
-                text: styleData.value
-                onTextChanged: {
-                    /* 
-                       this calls setData in the model,
-                       which in turn emits dataChanged signal
-                    */
-                    model.value = text
-                }
-            }
         }
     }  
 }

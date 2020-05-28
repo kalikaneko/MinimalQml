@@ -5,16 +5,21 @@ lessThan(QT_MAJOR_VERSION, 5): error("requires Qt 5")
 
 QT += qml quick
 
-SOURCES += src/main.cpp \
-           src/handlers.cpp \
-           src/qjsonmodel.cpp
-
-HEADERS += src/handlers.h \
-           src/qjsonmodel.h \
-           lib/libgoshim.h
+SOURCES += \
+    src/main.cpp \
+    src/handlers.cpp \
+    src/qjsonmodel.cpp
 
 RESOURCES += src/qml.qrc
+
+HEADERS += \
+    src/handlers.h \
+    src/qjsonmodel.h \
+    lib/libgoshim.h
+
 
 TARGET=MinimalQml
 LIBS += -L./lib -lgoshim -lpthread
 
+DISTFILES += \
+        README.md

@@ -200,19 +200,23 @@ bool QJsonModel::load(QIODevice *device)
     return loadJson(device->readAll());
 }
 
+void QJsonModel::refresh()
+{
+    qDebug() << "refreshing model";
+    beginResetModel();
+    endResetModel();
+}
+
 bool QJsonModel::loadJson(const QByteArray &json)
 {
     auto const& jdoc = QJsonDocument::fromJson(json);
-    qDebug()<<Q_FUNC_INFO<<"jdoc....."<<jdoc;
 
     if (!jdoc.isNull())
     {
-        qDebug()<<Q_FUNC_INFO<<"begin reset model?";
+        qDebug()<<Q_FUNC_INFO<<"begin reset model";
         beginResetModel();
-        qDebug()<<Q_FUNC_INFO<<"did reset model, about to del";
 
         delete mRootItem;
-        qDebug()<<Q_FUNC_INFO<<"deleted mrootitem?";
 
         if (jdoc.isArray()) {
             mRootItem = QJsonTreeItem::load(QJsonValue(jdoc.array()));
@@ -222,7 +226,9 @@ bool QJsonModel::loadJson(const QByteArray &json)
             mRootItem->setType(QJsonValue::Object);
         }
         endResetModel();
-        qDebug()<<Q_FUNC_INFO<<"end reset model... can we wait here a bit??";
+
+        // ???
+        emit dataChanged(QModelIndex(), QModelIndex(), {});
         return true;
     }
 
@@ -272,8 +278,6 @@ QVariant QJsonModel::data(const QModelIndex &index, int role) const
 
 bool QJsonModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
-    qDebug() << "called setData" << value << "and role:" << role;
-
     int col = index.column();
     if (Qt::EditRole == role) {
         if (col == 1) {

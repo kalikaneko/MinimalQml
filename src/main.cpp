@@ -7,6 +7,7 @@
 
 #include "handlers.h"
 #include "lib/libgoshim.h"
+#include "lib/qsyncable/qslistmodel.h"
 #include "qjsonmodel.h"
 
 /* Hi. I'm Troy McClure and I'll be your guide today! */
@@ -20,17 +21,12 @@ static char *json;
    The watchdog bridges the gap rom pure c callbacks to the rest of the c++
    logic. QJsonWatch is a QObject-derived class that can emit signals. */
 
-QJsonWatch* qw;
+QJsonWatch *qw;
 
 struct jsonWatchdog {
-    jsonWatchdog() {
-        qw = new QJsonWatch;
-    }
-    void changed() {
-        emit qw->jsonChanged(QString(json));
-    }
+    jsonWatchdog() { qw = new QJsonWatch; }
+    void changed() { emit qw->jsonChanged(QString(json)); }
 };
-
 
 extern "C" {
 static void *getWatchdog(void) { return (void *)(new jsonWatchdog); }
@@ -55,26 +51,39 @@ void onStatusChanged() {
 int main(int argc, char **argv) {
     QGuiApplication app(argc, argv);
 
-    QJsonModel *model = new QJsonModel;
-
-    std::string json = R"({"appName": "Roo", "provider": "miprovider"})";
-    model->loadJson(QByteArray::fromStdString(json));
-
-
-    /* broken */
-    QJsonProxy *jp = new QJsonProxy(model);
-    QObject::connect(qw, SIGNAL(jsonChanged(QString)),
-                     jp, SLOT(readJson(QString)));
-
     QQmlApplicationEngine engine;
     QQmlContext *ctx = engine.rootContext();
+
+    QJsonModel *model = new QJsonModel;
+
+    std::string json = R"({"appName": "TestApp", "provider": "example.org"})";
+    model->loadJson(QByteArray::fromStdString(json));
     ctx->setContextProperty("jsonModel", model);
+
+    QJsonProxy *jp = new QJsonProxy(ctx);
+
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
     HandleTextField handleTextField;
 
     QObject *topLevel = engine.rootObjects().value(0);
     QQuickWindow *window = qobject_cast<QQuickWindow *>(topLevel);
+
+    /* connect signals */
+    /*
+    QObject::connect(jp, &QJsonProxy::updateModel,
+                     [ctx, model](QString js) {
+                        qDebug() << "got", js;
+                        model->loadJson(js.toUtf8());
+                     });
+
+    QObject::connect(qw, SIGNAL(jsonChanged(QString)),
+                     jp, SLOT(readJson(QString)));
+     */
+
+    QObject::connect(qw, &QJsonWatch::jsonChanged, [ctx, model](QString js) {
+        model->loadJson(js.toUtf8());
+    });
 
     /* submitTextField signal is defined in qml.
      * emitted by Button.onClicked */
@@ -90,9 +99,6 @@ int main(int argc, char **argv) {
     char *stCh = "OnStatusChanged";
     GoString statusChangedEvt = {stCh, strlen(stCh)};
     SubscribeToEvent(statusChangedEvt, (void *)onStatusChanged);
-
-    /* trigger a dummy status change */
-    // QTimer::singleShot(2000, [] { TriggerStatusChange(); });
 
     /* initialize connection context  */
     InitializeContext();
