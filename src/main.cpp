@@ -6,9 +6,8 @@
 #include <string>
 
 #include "handlers.h"
-#include "lib/libgoshim.h"
-#include "lib/qsyncable/qslistmodel.h"
 #include "qjsonmodel.h"
+#include "lib/libgoshim.h"
 
 /* Hi. I'm Troy McClure and I'll be your guide today to this little
    contraption!! */

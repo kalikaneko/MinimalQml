@@ -224,9 +224,9 @@ TODO:
   [x] modify state (struct?) from outside
   [x] setState function that calls C callback
   [x] serialize the whole context struct into Json
-  [ ] receive the json in c++
-  [ ] update the Qml model
-  [ ] see that the UI reflects change
+  [x] receive the json in c++
+  [x] update the Qml model
+  [x] see that the UI reflects change
   [ ] call Go Functions from Qml/c++ (switch off / on)
   [ ] trigger ui events (like dialogs) from Go-land
 */
