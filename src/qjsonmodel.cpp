@@ -203,20 +203,26 @@ bool QJsonModel::load(QIODevice *device)
 bool QJsonModel::loadJson(const QByteArray &json)
 {
     auto const& jdoc = QJsonDocument::fromJson(json);
+    qDebug()<<Q_FUNC_INFO<<"jdoc....."<<jdoc;
 
     if (!jdoc.isNull())
     {
+        qDebug()<<Q_FUNC_INFO<<"begin reset model?";
         beginResetModel();
+        qDebug()<<Q_FUNC_INFO<<"did reset model, about to del";
+
         delete mRootItem;
+        qDebug()<<Q_FUNC_INFO<<"deleted mrootitem?";
+
         if (jdoc.isArray()) {
             mRootItem = QJsonTreeItem::load(QJsonValue(jdoc.array()));
             mRootItem->setType(QJsonValue::Array);
-
         } else {
             mRootItem = QJsonTreeItem::load(QJsonValue(jdoc.object()));
             mRootItem->setType(QJsonValue::Object);
         }
         endResetModel();
+        qDebug()<<Q_FUNC_INFO<<"end reset model... can we wait here a bit??";
         return true;
     }
 

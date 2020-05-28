@@ -15,9 +15,11 @@ class QJsonWatch : public QObject {
 
 class QJsonProxy : public QObject {
     Q_OBJECT
+    QJsonModel *model;
 
    public:
-    explicit QJsonProxy(QObject *parent = 0);
+
+    explicit QJsonProxy(QObject *parent = 0, QJsonModel *model = 0);
 
    public slots:
     void readJson(QString json);

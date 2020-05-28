@@ -55,14 +55,16 @@ void onStatusChanged() {
 int main(int argc, char **argv) {
     QGuiApplication app(argc, argv);
 
-    QJsonProxy *jp = new QJsonProxy;
+    QJsonModel *model = new QJsonModel;
+
+    std::string json = R"({"appName": "Roo", "provider": "miprovider"})";
+    model->loadJson(QByteArray::fromStdString(json));
+
+
+    /* broken */
+    QJsonProxy *jp = new QJsonProxy(model);
     QObject::connect(qw, SIGNAL(jsonChanged(QString)),
                      jp, SLOT(readJson(QString)));
-
-
-    QJsonModel *model = new QJsonModel;
-    std::string json = R"({})";
-    model->loadJson(QByteArray::fromStdString(json));
 
     QQmlApplicationEngine engine;
     QQmlContext *ctx = engine.rootContext();
