@@ -200,20 +200,12 @@ bool QJsonModel::load(QIODevice *device)
     return loadJson(device->readAll());
 }
 
-void QJsonModel::refresh()
-{
-    qDebug() << "refreshing model";
-    beginResetModel();
-    endResetModel();
-}
-
 bool QJsonModel::loadJson(const QByteArray &json)
 {
     auto const& jdoc = QJsonDocument::fromJson(json);
 
     if (!jdoc.isNull())
     {
-        qDebug()<<Q_FUNC_INFO<<"begin reset model";
         beginResetModel();
 
         delete mRootItem;

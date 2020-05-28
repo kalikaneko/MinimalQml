@@ -199,9 +199,6 @@ func InitializeContext() {
 	initOnce.Do(func() {
 		initializeContext(provider, appName)
 	})
-	fmt.Println(">>> ctx: ", ctx)
-	c, _ := ctx.toJson()
-	fmt.Println(">>> ctx: ", string(c))
 }
 
 //export MockUIInteraction
@@ -212,7 +209,6 @@ func MockUIInteraction() {
 
 //export RefreshContext
 func RefreshContext() *C.char {
-	log.Println(">> refreshing ctx")
 	c, _ := ctx.toJson()
 	return C.CString(string(c))
 }

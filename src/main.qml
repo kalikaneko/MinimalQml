@@ -3,13 +3,9 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
 
 Window {
-    signal submitTextField(string text)
-
-    // this function is our QML slot
-    function setTextFieldUI(text){
-        console.log("setTextField: " + text)
-        textField1.text = text
-    }
+    signal switchOn()
+    signal switchOff()
+    signal unblock()
 
     visible: true
     width: 360
@@ -22,22 +18,13 @@ Window {
         }
     }
 
-    TextField {
-        id: textField1
-        x: 31
-        y: 169
-        placeholderText: qsTr("Enter some text...")
-    }
-
     Button {
         id: onBtn
         x: 50
         y: 200
         text: qsTr("on")
 
-        onClicked:
-            // emit the submitTextField signal
-            submitTextField(textField1.text)
+        onClicked: switchOn()
     }
 
     Button {
@@ -46,9 +33,7 @@ Window {
         y: 200
         text: qsTr("off")
 
-        onClicked:
-            // emit the submitTextField signal
-            submitTextField(textField1.text)
+        onClicked: switchOff()
     }
 
     TreeView {
