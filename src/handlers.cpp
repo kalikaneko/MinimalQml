@@ -5,18 +5,6 @@
 #include "handlers.h"
 #include "lib/libgoshim.h"
 
-QJsonProxy::QJsonProxy(QObject *parent, QQmlApplicationEngine *eng) :
-    QObject(parent)
-{
-}
-
-void QJsonProxy::readJson(QString js)
-{
-    qDebug() << "received json (now parse)" << js;
-    emit updateModel(js);
-}
-
-
 HandleTextField::HandleTextField(QObject *parent) :
     QObject(parent)
 {

@@ -206,7 +206,7 @@ func InitializeContext() {
 
 //export MockUIInteraction
 func MockUIInteraction() {
-	log.Println("mocking ui interaction on port 8080")
+	log.Println("mocking ui interaction on port 8080. \nTry 'curl localhost:8080/off' and  'curl localhost:8080/off' to toggle status.")
 	go mockUI()
 }
 

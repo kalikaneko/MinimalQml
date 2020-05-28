@@ -10,7 +10,8 @@
 #include "lib/qsyncable/qslistmodel.h"
 #include "qjsonmodel.h"
 
-/* Hi. I'm Troy McClure and I'll be your guide today! */
+/* Hi. I'm Troy McClure and I'll be your guide today to this little
+   contraption!! */
 
 /* This is our glorious global object state. in here we will receive a
    serialized snapshot of the context from the application backend */
@@ -55,31 +56,19 @@ int main(int argc, char **argv) {
     QQmlContext *ctx = engine.rootContext();
 
     QJsonModel *model = new QJsonModel;
-
-    std::string json = R"({"appName": "TestApp", "provider": "example.org"})";
+    std::string json = R"({"appName": "dummy", "provider": "example.org"})";
     model->loadJson(QByteArray::fromStdString(json));
     ctx->setContextProperty("jsonModel", model);
 
-    QJsonProxy *jp = new QJsonProxy(ctx);
 
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
-
-    HandleTextField handleTextField;
 
     QObject *topLevel = engine.rootObjects().value(0);
     QQuickWindow *window = qobject_cast<QQuickWindow *>(topLevel);
 
-    /* connect signals */
-    /*
-    QObject::connect(jp, &QJsonProxy::updateModel,
-                     [ctx, model](QString js) {
-                        qDebug() << "got", js;
-                        model->loadJson(js.toUtf8());
-                     });
+    HandleTextField handleTextField;
 
-    QObject::connect(qw, SIGNAL(jsonChanged(QString)),
-                     jp, SLOT(readJson(QString)));
-     */
+    /* connect signals */
 
     QObject::connect(qw, &QJsonWatch::jsonChanged, [ctx, model](QString js) {
         model->loadJson(js.toUtf8());

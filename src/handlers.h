@@ -18,23 +18,6 @@ class QJsonWatch : public QObject {
 
 };
 
-// FIXME -- I think we can do w/o this proxy, since i'm using a lambda in the end
-//
-class QJsonProxy : public QObject {
-    Q_OBJECT
-    QQmlApplicationEngine *eng;
-
-   public:
-
-    explicit QJsonProxy(QObject *parent = 0, QQmlApplicationEngine *eng = 0);
-
-   signals:
-    void updateModel(QString s);
-
-   public slots:
-    void readJson(QString json);
-};
-
 class HandleTextField : public QObject {
     Q_OBJECT
 
