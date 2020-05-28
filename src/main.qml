@@ -20,7 +20,7 @@ Window {
 
     Button {
         id: onBtn
-        x: 50
+        x: 80
         y: 200
         text: qsTr("on")
 
@@ -29,7 +29,7 @@ Window {
 
     Button {
         id: offBtn
-        x: 150
+        x: 180
         y: 200
         text: qsTr("off")
 

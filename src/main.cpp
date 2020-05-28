@@ -32,7 +32,7 @@ struct jsonWatchdog {
 /* we need C wrappers around every C++ object, so that we can invoke their methods
  * in the callbacks passed to CGO. */
 extern "C" {
-static void *getWatchdog(void) { return (void *)(new jsonWatchdog); }
+static void *newWatchdog(void) { return (void *)(new jsonWatchdog); }
 static void jsonChanged(void *thisPtr) {
     if (thisPtr != NULL) {
         jsonWatchdog *classPtr = static_cast<jsonWatchdog *>(thisPtr);
@@ -41,7 +41,7 @@ static void jsonChanged(void *thisPtr) {
 }
 }
 
-void *watchdog = getWatchdog();
+void *wd = newWatchdog();
 
 /* onStatusChanged is the registered C callback that we pass to CGO.
    When called, it pulls a string serialization of the context object, than we
@@ -51,7 +51,7 @@ void onStatusChanged() {
     char *st = RefreshContext();
     json = st;
     /* call the wrapped watchdog method, that emits a Qt signal in turn */
-    jsonChanged(watchdog);
+    jsonChanged(wd);
     free(st);
 }
 
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
     QQmlContext *ctx = engine.rootContext();
 
     QJsonModel *model = new QJsonModel;
-    std::string json = R"({"appName": "dummy", "provider": "example.org"})";
+    std::string json = R"({"appName": "unknown", "provider": "unknown"})";
     model->loadJson(QByteArray::fromStdString(json));
     ctx->setContextProperty("jsonModel", model);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
