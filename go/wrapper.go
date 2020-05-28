@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"reflect"
 	"sync"
 	"unsafe"
@@ -21,11 +22,13 @@ import "C"
 /* callbacks into C-land */
 
 var mut sync.Mutex
+var stmut sync.Mutex
 var cbs = make(map[string](*[0]byte))
 var initOnce sync.Once
 
 // Events knows about all the posible events that C functions can be interested
 // in subscribing to. You cannot subscribe to an event that is not listed here.
+// FIXME use iota, and map from string?
 type Events struct {
 	OnStatusChanged string
 }
@@ -116,6 +119,8 @@ type connectionCtx struct {
 }
 
 func (c connectionCtx) toJson() ([]byte, error) {
+	stmut.Lock()
+	defer stmut.Unlock()
 	b, err := json.Marshal(c)
 	if err != nil {
 		log.Println(err)
@@ -126,17 +131,43 @@ func (c connectionCtx) toJson() ([]byte, error) {
 
 var ctx *connectionCtx
 
+func setStatus(st status) {
+	stmut.Lock()
+	defer stmut.Unlock()
+	ctx.Status = st
+	go trigger("OnStatusChanged")
+}
+
 // initializeContext initializes an empty connStatus and sets the global
 // ctx variable to it. This is expected to be called only once, so the public
 // api uses the sync.Once primitive to call this.
 func initializeContext(provider, appName string) {
 	var st status = off
-	c := connectionCtx{
+	ctx = &connectionCtx{
 		AppName:  appName,
 		Provider: provider,
 		Status:   st,
 	}
-	ctx = &c
+}
+
+/* mock http server for mocking vpn behavior on ui interaction */
+
+func mockUIOn(w http.ResponseWriter, r *http.Request) {
+	log.Println("changing status: on")
+	var st status = on
+	setStatus(st)
+}
+
+func mockUIOff(w http.ResponseWriter, r *http.Request) {
+	log.Println("changing status: off")
+	var st status = off
+	setStatus(st)
+}
+
+func mockUI() {
+	http.HandleFunc("/on", mockUIOn)
+	http.HandleFunc("/off", mockUIOff)
+	http.ListenAndServe(":8080", nil)
 }
 
 /*
@@ -173,19 +204,29 @@ func InitializeContext() {
 	fmt.Println(">>> ctx: ", string(c))
 }
 
+//export MockUIInteraction
+func MockUIInteraction() {
+	log.Println("mocking ui interaction on port 8080")
+	go mockUI()
+}
+
 //export RefreshContext
-func RefreshContext() string {
-	return "foobar"
+func RefreshContext() *C.char {
+	log.Println(">> refreshing ctx")
+	c, _ := ctx.toJson()
+	return C.CString(string(c))
 }
 
 func main() {}
 
 /*
 TODO:
-  [ ] modify state (struct?) from outside
-  [ ] setState function that calls C callback
+  [x] modify state (struct?) from outside
+  [x] setState function that calls C callback
   [x] serialize the whole context struct into Json
-  [ ] receive the json in c++ -> update the Qml model
+  [ ] receive the json in c++
+  [ ] update the Qml model
+  [ ] see that the UI reflects change
   [ ] call Go Functions from Qml/c++ (switch off / on)
   [ ] trigger ui events (like dialogs) from Go-land
 */

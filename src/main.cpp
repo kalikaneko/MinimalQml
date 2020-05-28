@@ -8,10 +8,19 @@
 
 #include "lib/libgoshim.h"
 #include "handlers.h"
+#include "connection.h"
 #include "qjsonmodel.h"
 
-void onStatusChanged() {
-    printf("(from c) status changed!\n");
+
+char* json ;
+
+void onStatusChanged()
+{
+    qDebug() << "pulling context...";
+    char* st = RefreshContext();
+    json = st;
+    printf("%s\n", json);
+    free(st);
 }
 
 int main(int argc, char** argv)
@@ -19,9 +28,7 @@ int main(int argc, char** argv)
     QGuiApplication app(argc, argv);
 
     QJsonModel* model = new QJsonModel;
-    std::string json = R"({
-                       "foo": "bar"
-                   })";
+    std::string json = R"({})";
     model->loadJson(QByteArray::fromStdString(json));
 
     QQmlApplicationEngine engine;
@@ -51,10 +58,11 @@ int main(int argc, char** argv)
     SubscribeToEvent(statusChangedEvt, (void*)onStatusChanged);
 
     /* trigger a dummy status change */
-    QTimer::singleShot(2000, [] { TriggerStatusChange(); });
+    // QTimer::singleShot(2000, [] { TriggerStatusChange(); });
 
     /* initialize connection context  */
     InitializeContext();
+    MockUIInteraction();
 
     return app.exec();
 }
