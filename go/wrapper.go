@@ -26,9 +26,9 @@ var stmut sync.Mutex
 var cbs = make(map[string](*[0]byte))
 var initOnce sync.Once
 
-// Events knows about all the posible events that C functions can be interested
-// in subscribing to. You cannot subscribe to an event that is not listed here.
-// FIXME use iota, and map from string?
+// Events are just a enumeration of all the posible events that C functions can
+// be interested in subscribing to. You cannot subscribe to an event that is
+// not listed here.
 type Events struct {
 	OnStatusChanged string
 }
@@ -62,8 +62,8 @@ func trigger(event string) {
 
 /* connection status */
 
-// status reflects the current state of the VPN connection. Go code is responsible for
-// updating it; C-land just watches its changes and pulls its updates via the serialized
+// status reflects the current VPN status. Go code is responsible for updating
+// it; C-land just watches its changes and pulls its updates via the serialized
 // context object.
 type status int
 
@@ -86,7 +86,7 @@ func (s status) MarshalJSON() ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-// An action is originated in the UI. They are requests coming from the
+// An action is originated in the UI. These represent requests coming from the
 // frontend via the C code. VPN code needs to watch them and fullfill their
 // requests as soon as possible.
 type actions int
@@ -108,9 +108,10 @@ func (a actions) MarshalJSON() ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-// connectionCtx is the global struct that is passed around to C-land. It also
-// serves as the primary way of passing requests from the frontend to the Go-core, by
-// letting the UI write some of these variables and processing them.
+// The connectionCtx keeps the global state that is passed around to C-land. It
+// also serves as the primary way of passing requests from the frontend to the
+// Go-core, by letting the UI write some of these variables and processing
+// them.
 type connectionCtx struct {
 	AppName  string    `json:"appName"`
 	Provider string    `json:"provider"`
@@ -138,8 +139,8 @@ func setStatus(st status) {
 	go trigger("OnStatusChanged")
 }
 
-// initializeContext initializes an empty connStatus and sets the global
-// ctx variable to it. This is expected to be called only once, so the public
+// initializeContext initializes an empty connStatus and assigns it to the
+// global ctx holder. This is expected to be called only once, so the public
 // api uses the sync.Once primitive to call this.
 func initializeContext(provider, appName string) {
 	var st status = off
@@ -150,7 +151,9 @@ func initializeContext(provider, appName string) {
 	}
 }
 
-/* mock http server for mocking vpn behavior on ui interaction */
+/* mock http server: easy way to mocking vpn behavior on ui interaction. This
+* should also show a good way of writing functionality tests just for the Qml
+* layer */
 
 func mockUIOn(w http.ResponseWriter, r *http.Request) {
 	log.Println("changing status: on")
@@ -176,15 +179,19 @@ func mockUI() {
 
 */
 
-//export SayHello
-func SayHello() {
-	fmt.Println("hello from go, earthling!")
+//export SwitchOn
+func SwitchOn() {
+	fmt.Println("switch on...")
 }
 
-//export TriggerStatusChange
-func TriggerStatusChange() {
-	// XXX just for testing
-	trigger("OnStatusChanged")
+//export SwitchOff
+func SwitchOff() {
+	fmt.Println("switch off...")
+}
+
+//export Unblock
+func Unblock() {
+	fmt.Println("switch off...")
 }
 
 //export SubscribeToEvent

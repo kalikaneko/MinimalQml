@@ -18,4 +18,16 @@ class QJsonWatch : public QObject {
 
 };
 
+class Backend : public QObject
+{
+    Q_OBJECT
+public:
+        explicit Backend(QObject *parent = 0);
+
+public slots:
+    void switchOn();
+    void switchOff();
+    void unblock();
+};
+
 #endif  // HANDLERS_H

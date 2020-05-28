@@ -7,7 +7,8 @@ QT += qml quick
 
 SOURCES += \
     src/main.cpp \
-    src/qjsonmodel.cpp
+    src/qjsonmodel.cpp \
+    src/handlers.cpp
 
 RESOURCES += src/qml.qrc
 

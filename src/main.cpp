@@ -63,10 +63,19 @@ int main(int argc, char **argv) {
     QJsonModel *model = new QJsonModel;
     std::string json = R"({"appName": "unknown", "provider": "unknown"})";
     model->loadJson(QByteArray::fromStdString(json));
+
+    /* set the backend handler class that holds all the slots responsible for
+     * calling back to Go with action requests */
+    Backend backend;
+    ctx->setContextProperty("backend", &backend);
+
+    /* set the json model, this gets re-loaded every time we receive an update from Go */
     ctx->setContextProperty("jsonModel", model);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
 
-    /* connect signals */
+    /* connect the jsonChanged signal explicitely. The signals in the
+     * GUI->Backend direction are done in the Qml layer and delegated to the
+     * Backend class. */
     QObject::connect(qw, &QJsonWatch::jsonChanged, [ctx, model](QString js) {
         model->loadJson(js.toUtf8());
     });

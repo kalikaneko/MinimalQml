@@ -3,10 +3,6 @@ import QtQuick.Window 2.2
 import QtQuick.Controls 1.4
 
 Window {
-    signal switchOn()
-    signal switchOff()
-    signal unblock()
-
     visible: true
     width: 360
     height: 360
@@ -24,7 +20,7 @@ Window {
         y: 200
         text: qsTr("on")
 
-        onClicked: switchOn()
+        onClicked: backend.switchOn()
     }
 
     Button {
@@ -33,7 +29,7 @@ Window {
         y: 200
         text: qsTr("off")
 
-        onClicked: switchOff()
+        onClicked: backend.switchOff()
     }
 
     TreeView {
