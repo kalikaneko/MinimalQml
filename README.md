@@ -34,9 +34,9 @@ You should see the binary in `release/MinimalQml.exe`.
 TODO
 ------------------
 
-* [ ] explore how to pass structs around
-* [ ] way to pass a callback from c code to Go (so that we can emit signals instead of polling)
-* [ ] demonstrate persisting object in go (spawn a goroutine that inits and hold it, use channels etc)
+* [x] explore how to pass structs around
+* [x] way to pass a callback from c code to Go (so that we can emit signals instead of polling)
+* [x] demonstrate persisting object in go (spawn a goroutine that inits and hold it, use channels etc)
 * [ ] provide Vagrantfile (or Dockerfile) with mxe toolchain pre-installed.
 * [ ] document quirks on complation of the toolchain (uh... maybe give another try to debian packages, now that I got the go cross-compilation right!)
 * [ ] explore qtquick deployment "the qt way" 
